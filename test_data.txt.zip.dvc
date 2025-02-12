@@ -1,0 +1,5 @@
+outs:
+- md5: ccd251ab73f0a2c155cd0620cbb8977d
+  size: 14485180
+  hash: md5
+  path: test_data.txt.zip
