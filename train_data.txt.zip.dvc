@@ -1,0 +1,5 @@
+outs:
+- md5: 1231af3143161e219db0d5034b6ba88e
+  size: 14617856
+  hash: md5
+  path: train_data.txt.zip
