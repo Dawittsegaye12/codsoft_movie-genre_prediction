@@ -1,0 +1,5 @@
+outs:
+- md5: 244765c9f22ee7abc93285f4950a677e
+  size: 14626199
+  hash: md5
+  path: test_data_solution.txt.zip
