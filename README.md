@@ -117,21 +117,16 @@ To improve model performance, the following feature engineering techniques are a
    - Remove special characters, punctuation, and stopwords.
    - Tokenization and lemmatization/stemming.
 
-2. **TF-IDF (Term Frequency-Inverse Document Frequency)**
-   - Convert `Description` into numerical vectors using TF-IDF to capture word importance.
-
 3. **Word Embeddings**
-   - Utilize `word2vec`, `GloVe`, or `BERT embeddings` to capture contextual meaning from `Description`.
+   - Utilize `bidirectional RNN` to capture contextual meaning from `Description`.
 
 4. **Sentiment Analysis Features**
-   - Encode `Sentiment_Label` as a numerical feature (0 for Negative, 1 for Positive).
+   - Encode `Sentiment_Label` as a numerical feature (0 neutral, -1 for Negative, 1 for Positive).
 
 5. **Lexical and Syntactic Features**
    - `word_count`: Represents sentence complexity.
    - `char_count`: Captures description length.
 
-6. **N-grams Features**
-   - Generate bigrams and trigrams from `Description` for better context representation.
 
 7. **Genre One-Hot Encoding**
    - Convert `Genre` into a numerical format using one-hot encoding.
