@@ -95,3 +95,69 @@ movie_genre_classification/
 ---
 Feel free to contribute and suggest improvements! 🚀
 
+# Movie Genre Classification
+
+## Project Overview
+This project aims to classify movies into their respective genres based on their plot summaries. The dataset contains movie descriptions along with metadata such as title, sentiment labels, word count, and character count. Various machine learning techniques are employed to process and analyze the text data for accurate genre classification.
+
+## Dataset Description
+The dataset consists of the following columns:
+- **ID**: Unique identifier for each movie.
+- **Title**: Movie title.
+- **Genre**: The actual genre of the movie.
+- **Description**: A textual summary of the movie plot.
+- **Sentiment_Label**: Sentiment classification of the description (Positive/Negative).
+- **word_count**: The number of words in the description.
+- **char_count**: The number of characters in the description.
+
+## Feature Engineering
+To improve model performance, the following feature engineering techniques are applied:
+1. **Text Preprocessing**
+   - Convert text to lowercase.
+   - Remove special characters, punctuation, and stopwords.
+   - Tokenization and lemmatization/stemming.
+
+2. **TF-IDF (Term Frequency-Inverse Document Frequency)**
+   - Convert `Description` into numerical vectors using TF-IDF to capture word importance.
+
+3. **Word Embeddings**
+   - Utilize `word2vec`, `GloVe`, or `BERT embeddings` to capture contextual meaning from `Description`.
+
+4. **Sentiment Analysis Features**
+   - Encode `Sentiment_Label` as a numerical feature (0 for Negative, 1 for Positive).
+
+5. **Lexical and Syntactic Features**
+   - `word_count`: Represents sentence complexity.
+   - `char_count`: Captures description length.
+
+6. **N-grams Features**
+   - Generate bigrams and trigrams from `Description` for better context representation.
+
+7. **Genre One-Hot Encoding**
+   - Convert `Genre` into a numerical format using one-hot encoding.
+
+## Feature Selection
+To improve efficiency, we apply the following feature selection techniques:
+1. **Remove Redundant Features**
+   - Drop `ID` since it does not contribute to genre classification.
+
+2. **Statistical Tests for Feature Importance**
+   - Apply **Chi-Square Test** or **Mutual Information** to identify relevant words in `Description` for classification.
+
+3. **Dimensionality Reduction**
+   - Use **PCA (Principal Component Analysis)** or **t-SNE** to reduce feature dimensions when using TF-IDF or word embeddings.
+
+## Implementation
+The project is implemented using Python with libraries such as:
+- `pandas` for data processing
+- `scikit-learn` for feature extraction and modeling
+- `nltk` and `spaCy` for text preprocessing
+- `tensorflow` or `transformers` for deep learning-based approaches
+
+## Conclusion
+This project explores various natural language processing (NLP) techniques to classify movie genres based on textual descriptions. By leveraging different feature engineering and selection strategies, the model aims to improve accuracy and generalization.
+
+---
+### Author
+**Dawit Tsegaye**
+
