@@ -1,3 +1,10 @@
 pandas 
 numpy
 scikit-learn
+seaborn
+matplotlib
+textblob
+plotly
+tensorflow
+nltk
+numpy
