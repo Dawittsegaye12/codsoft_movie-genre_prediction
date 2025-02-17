@@ -152,6 +152,114 @@ The project is implemented using Python with libraries such as:
 ## Conclusion
 This project explores various natural language processing (NLP) techniques to classify movie genres based on textual descriptions. By leveraging different feature engineering and selection strategies, the model aims to improve accuracy and generalization.
 
+# Functionality of the Code
+
+## 1. Library Imports and Initialization
+
+- **Libraries**:
+  - **Pandas**: Handles dataframes (CSV data).
+  - **Spacy**: Used for advanced NLP tasks.
+  - **TextBlob**: For sentiment analysis.
+  - **Scikit-learn**: For preprocessing, building pipelines, and training models.
+  - **TensorFlow**: For creating a neural network.
+  - **Gensim**: Used to train Word2Vec for word embeddings.
+
+- **Logging**: Configures logging to monitor the flow of operations.
+
+---
+
+## 2. Custom Transformers
+
+### `TextPreprocessor`
+- **Purpose**: A custom transformer that cleans text by converting it to lowercase and removing non-alphanumeric characters.
+- **Functions**:
+  - `fit`: Required by the scikit-learn pipeline (not used here).
+  - `transform`: Applies the `clean_text` method on each entry in the dataset.
+  - `clean_text`: Converts text to lowercase and removes special characters.
+
+### `FeatureExtractor`
+- **Purpose**: Extracts additional features like sentiment, word count, and character count from the text.
+- **Functions**:
+  - `fit`: Required by the scikit-learn pipeline (not used here).
+  - `transform`: Calculates sentiment (positive, negative, or neutral), word count, and character count for each text entry.
+  - `get_sentiment`: Uses `TextBlob` to calculate sentiment polarity.
+
+### `EmbeddingTransformer`
+- **Purpose**: Converts raw text into word embeddings using a trained Word2Vec model.
+- **Functions**:
+  - `fit`: Required by the scikit-learn pipeline (not used here).
+  - `transform`: Uses Word2Vec to convert each text into word embeddings and returns the average of word vectors as the text's representation.
+  - `text_to_vector`: Converts text into word vectors and averages them.
+
+---
+
+## 3. Model Training (`build_model`)
+
+- **Purpose**: Builds a simple neural network model for multi-class classification (e.g., genre prediction).
+- **Architecture**:
+  - Input layer (128 units).
+  - Hidden layer (64 units).
+  - Output layer (number of classes = genres).
+  - Softmax activation for multi-class classification.
+  - Uses Adam optimizer and sparse categorical cross-entropy loss function.
+
+---
+
+## 4. Load Data and Train Word2Vec (`load_data_and_train_w2v`)
+
+- **Purpose**: Loads training and test data, trains a Word2Vec model on the corpus of `Description` and `Title`.
+- **Functions**:
+  - Loads data from CSV files using Pandas.
+  - Tokenizes `Description` and `Title` into words.
+  - Trains a Word2Vec model using Gensim on the tokenized data.
+
+---
+
+## 5. Create the Full Pipeline (`create_pipeline`)
+
+- **Purpose**: Creates a complete pipeline for preprocessing, feature extraction, and model training.
+- **Pipeline Steps**:
+  1. **Text Preprocessing**: Cleans the text.
+  2. **Word Embedding**: Converts text to word embeddings using the trained Word2Vec model.
+  3. **Scaling**: Standardizes the feature vectors.
+  4. **Model**: A neural network is used to predict the target labels.
+
+---
+
+## 6. Run the Pipeline (`run_pipeline`)
+
+- **Purpose**: Executes the entire workflow by loading data, training Word2Vec, building the pipeline, and training the model.
+- **Steps**:
+  - Loads data and trains Word2Vec.
+  - Extracts text data (`Description`) and target labels (`Genre`).
+  - Creates the pipeline and fits it to the data.
+  - Optionally saves the model, encoder, and scaler.
+
+---
+
+## 7. Main Execution
+
+- **Purpose**: The entry point of the script, which triggers the pipeline.
+- **Steps**:
+  - Defines the paths to the training and test data.
+  - Calls `run_pipeline()` to start the entire process.
+
+---
+
+## Summary of Functionality
+
+1. **Data Loading**: Loads training and test data from CSV files.
+2. **Text Preprocessing**: Cleans and tokenizes the text data (descriptions and titles).
+3. **Word2Vec Training**: Trains a Word2Vec model on the `Description` and `Title` columns.
+4. **Feature Extraction**: Extracts additional features like sentiment, word count, and character count.
+5. **Word Embedding**: Converts text into word embeddings using the trained Word2Vec model.
+6. **Model Training**: Trains a neural network on the transformed data to predict the target labels (genres).
+7. **Pipeline Execution**: The entire process is orchestrated using scikit-learn's pipeline mechanism, which combines the steps in a sequence and trains the model.
+
+---
+
+Let me know if you need more details or adjustments!
+
 ---
 ### Author
 **Dawit Tsegaye**
