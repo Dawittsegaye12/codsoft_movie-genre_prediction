@@ -8,4 +8,3 @@ plotly
 tensorflow
 nltk
 numpy
-spacy
