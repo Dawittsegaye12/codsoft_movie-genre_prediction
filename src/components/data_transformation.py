@@ -81,10 +81,7 @@ df['Description'] = df['Description'].apply(lemmatize_text)
 # 5. Word Embedding (Bidirectional RNN)
 
 # Prepare Text for Embedding
-tokenizer = Tokenizer(num_words=5000, oov_token="<OOV>")
-tokenizer.fit_on_texts(df['Description'])
-sequences = tokenizer.texts_to_sequences(df['Description'])
-X = pad_sequences(sequences, padding='post')
+t
 
 # Define the RNN model
 model = Sequential([
