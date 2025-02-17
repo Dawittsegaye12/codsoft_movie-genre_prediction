@@ -1,131 +1,130 @@
 import pandas as pd
-import numpy as np
 import re
-import nltk
-import pickle
-import logging
-from sklearn.preprocessing import LabelEncoder, StandardScaler
-from sklearn.model_selection import train_test_split
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Embedding, LSTM, Bidirectional, Dense
-from textblob import TextBlob
-from sklearn.metrics import classification_report
 import spacy
+import numpy as np
+from textblob import TextBlob
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from gensim.models import Word2Vec
+import logging
 
-# Set up logging
+# Initialize Spacy NLP
+nlp = spacy.load("en_core_web_sm")
+
+# Configure Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-data = pd.read_csv(r'/content/test_data_solution.txt.zip', delimiter=' ::: ', engine='python', header=None)
-data.columns = ['ID', 'Title', 'Genre', 'Description']
+# Custom Transformers
+class TextPreprocessor(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        pass
+    
+    def fit(self, X, y=None):
+        return self
+    
+    def transform(self, X):
+        return [self.clean_text(text) for text in X]
 
+    @staticmethod
+    def clean_text(text):
+        text = str(text).lower()
+        text = re.sub(r'[^a-zA-Z0-9\s]', '', text)
+        return text
+    
+class FeatureExtractor(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        pass
+    
+    def fit(self, X, y=None):
+        return self
+    
+    def transform(self, X):
+        features = []
+        for text in X:
+            sentiment = self.get_sentiment(text)
+            word_count = len(text.split())
+            char_count = len(text)
+            features.append([sentiment, word_count, char_count])
+        return np.array(features)
 
-data2= pd.read_csv(r'/content/train_data.txt.zip', delimiter=' ::: ', engine='python', header=None)
-data2.columns = ['ID', 'Title', 'Genre', 'Description']
+    @staticmethod
+    def get_sentiment(text):
+        score = TextBlob(str(text)).sentiment.polarity
+        return 1 if score > 0 else (-1 if score < 0 else 0)
 
-# Load spaCy's English tokenizer and lemmatizer
-nlp = spacy.load("en_core_web_sm")
+class EmbeddingTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self, w2v_model):
+        self.w2v_model = w2v_model
 
-# Define file paths (update as necessary)
-if data.shape[1] == 4 and data2.shape[1] == 4:
-    df = pd.concat([data, data2], ignore_index=True)
+    def fit(self, X, y=None):
+        return self
+    
+    def transform(self, X):
+        return np.array([self.text_to_vector(text) for text in X])
 
-# Drop rows with missing descriptions
-df = df.dropna(subset=['Description'])
+    def text_to_vector(self, text):
+        words = text.split()
+        vectors = [self.w2v_model.wv[word] for word in words if word in self.w2v_model.wv]
+        return np.mean(vectors, axis=0) if vectors else np.zeros(128)
 
-# 2. Feature Engineering
+# Model Training
+def build_model(input_shape, num_classes):
+    model = Sequential([ 
+        Dense(128, activation='relu', input_shape=(input_shape,)),
+        Dense(64, activation='relu'),
+        Dense(num_classes, activation='softmax')
+    ])
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    return model
 
-# Sentiment Label Creation
-def get_sentiment(text):
-    analysis = TextBlob(str(text))
-    score = analysis.sentiment.polarity
-    return 1 if score > 0 else (-1 if score < 0 else 0)
+# Load Data and Train Word2Vec
+def load_data_and_train_w2v(train_path, test_path):
+    df1 = pd.read_csv(test_path, delimiter=' ::: ', engine='python', header=None, names=['ID', 'Title', 'Genre', 'Description'])
+    df2 = pd.read_csv(train_path, delimiter=' ::: ', engine='python', header=None, names=['ID', 'Title', 'Genre', 'Description'])
+    df = pd.concat([df1, df2], ignore_index=True)
+    df.dropna(subset=['Description'], inplace=True)
+    corpus = [text.split() for text in df['Description'].tolist()] + [text.split() for text in df['Title'].tolist()]
+    w2v_model = Word2Vec(sentences=corpus, vector_size=128, window=5, min_count=1, sg=1, workers=4)
+    return df, w2v_model
 
-df['sentiment'] = df['Description'].apply(get_sentiment)
+# Full Pipeline
+def create_pipeline(w2v_model):
+    pipeline = Pipeline(steps=[
+        ('preprocessing', TextPreprocessor()),
+        ('features', FeatureExtractor()),
+        ('embedding', EmbeddingTransformer(w2v_model)),
+        ('scaler', StandardScaler()),
+        ('model', build_model(input_shape=128*2, num_classes=10))  # Update num_classes accordingly
+    ])
+    return pipeline
 
-# Word Count
-df['word_count'] = df['Description'].apply(lambda x: len(str(x).split()))
+# Run the entire pipeline
+def run_pipeline(train_path, test_path):
+    logger.info("Loading data and training Word2Vec...")
+    df, w2v_model = load_data_and_train_w2v(train_path, test_path)
 
-# Character Count
-df['char_count'] = df['Description'].apply(lambda x: len(str(x)))
+    X = df['Description'].values  # Use descriptions or both Title and Description if needed
+    y = df['Genre'].values  # Assuming 'Genre' is your target variable
 
-# 3. Label Encoding for Genre
-encoder = LabelEncoder()
-df['genre_encoded'] = encoder.fit_transform(df['Genre'])
+    logger.info("Creating pipeline...")
+    pipeline = create_pipeline(w2v_model)
 
-# 4. Text Preprocessing
+    logger.info("Training model...")
+    pipeline.fit(X, y)
 
-# Convert to Lowercase
-df['Description'] = df['Description'].str.lower()
+    # Save the model, encoder, and scaler if necessary
+    # e.g., save the trained model to disk using pickle, joblib, or other formats
 
-# Remove Special Characters and Punctuation
-df['Description'] = df['Description'].apply(lambda x: re.sub(r'[^a-zA-Z0-9\s]', '', str(x)))
+    return pipeline
 
-# Remove Stopwords
-stop_words = set(nlp.Defaults.stop_words)
-
-def remove_stopwords(text):
-    return ' '.join([word for word in str(text).split() if word not in stop_words])
-
-df['Description'] = df['Description'].apply(remove_stopwords)
-
-# Tokenization and Lemmatization using spaCy
-def lemmatize_text(text):
-    doc = nlp(str(text))  # Process the text with spaCy
-    return ' '.join([token.lemma_ for token in doc])
-
-df['Description'] = df['Description'].apply(lemmatize_text)
-
-# 5. Word Embedding (Bidirectional RNN)
-
-# Prepare Text for Embedding
-tokenizer = Tokenizer(num_words=5000, oov_token="<OOV>")
-tokenizer.fit_on_texts(df['Description'])
-sequences = tokenizer.texts_to_sequences(df['Description'])
-X = pad_sequences(sequences, padding='post')
-
-# Define the RNN model
-model = Sequential([
-    Embedding(input_dim=5000, output_dim=128, input_length=X.shape[1]),
-    Bidirectional(LSTM(64)),
-    Dense(32, activation='relu'),
-    Dense(1, activation='sigmoid')
-])
-
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-
-# Fit the model (using sentiment as the target for simplicity)
-y = df['sentiment'].values
-model.fit(X, y, epochs=5, batch_size=64, verbose=1)
-
-# Get the word embedding output (this is the fixed-length vector for each description)
-embeddings = model.predict(X)
-
-# Add the embeddings as new features
-df['embedding'] = embeddings.tolist()
-
-# 6. Standardization (apply only to numerical columns like word_count and char_count)
-scaler = StandardScaler()
-df[['word_count', 'char_count']] = scaler.fit_transform(df[['word_count', 'char_count']])
-
-# Final Dataset
-logger.info("Final transformed dataset: ")
-logger.info(df.head())
-
-# Split the data into training and testing sets
-train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
-
-# Save transformed data
-with open('training_data.pkl', 'wb') as f:
-    pickle.dump(train_df, f)
-
-with open('testing_data.pkl', 'wb') as f:
-    pickle.dump(test_df, f)
-
-logger.info("Transformed data has been saved successfully.")
-
-# Optionally, print classification report for model evaluation
-logger.info("Classification Report:")
-print(classification_report(y, model.predict(X).round()))
+# 6️⃣ Run Everything
+if __name__ == "__main__":
+    train_path = "/content/train_data.txt.zip"
+    test_path = "/content/test_data_solution.txt.zip"
+    pipeline = run_pipeline(train_path, test_path)
