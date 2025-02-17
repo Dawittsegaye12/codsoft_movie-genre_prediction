@@ -96,11 +96,10 @@ def load_data_and_train_w2v(train_path, test_path):
 # Full Pipeline
 def create_pipeline(w2v_model):
     pipeline = Pipeline(steps=[
-        ('preprocessing', TextPreprocessor()),
-        ('features', FeatureExtractor()),
-        ('embedding', EmbeddingTransformer(w2v_model)),
-        ('scaler', StandardScaler()),
-        ('model', build_model(input_shape=128*2, num_classes=10))  # Update num_classes accordingly
+        ('preprocessing', TextPreprocessor()),  # Text preprocessing
+        ('embedding', EmbeddingTransformer(w2v_model)),  # Word embedding (on raw text)
+        ('scaler', StandardScaler()),  # Feature scaling
+        ('model', build_model(input_shape=128, num_classes=10))  # Update num_classes accordingly
     ])
     return pipeline
 
@@ -109,7 +108,8 @@ def run_pipeline(train_path, test_path):
     logger.info("Loading data and training Word2Vec...")
     df, w2v_model = load_data_and_train_w2v(train_path, test_path)
 
-    X = df['Description'].values  # Use descriptions or both Title and Description if needed
+    # Extract text data (Description) and target labels (Genre)
+    X = df['Description'].values  # Use raw text (descriptions)
     y = df['Genre'].values  # Assuming 'Genre' is your target variable
 
     logger.info("Creating pipeline...")
@@ -123,7 +123,7 @@ def run_pipeline(train_path, test_path):
 
     return pipeline
 
-# 6️⃣ Run Everything
+
 if __name__ == "__main__":
     train_path = "/content/train_data.txt.zip"
     test_path = "/content/test_data_solution.txt.zip"
