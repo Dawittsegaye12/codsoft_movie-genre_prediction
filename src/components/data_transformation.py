@@ -125,6 +125,6 @@ def run_pipeline(train_path, test_path):
 
 
 if __name__ == "__main__":
-    train_path = "/content/train_data.txt.zip"
-    test_path = "/content/test_data_solution.txt.zip"
+    train_path = "C:\Users\SOOQ ELASER\movie_genre_prediction\dataset\train_data.txt.zip"
+    test_path = "C:\Users\SOOQ ELASER\movie_genre_prediction\dataset\test_data_solution.csv"
     pipeline = run_pipeline(train_path, test_path)
