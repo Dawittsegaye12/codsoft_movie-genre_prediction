@@ -1,10 +1,12 @@
-import pickle
-import joblib
+import numpy as np
 from sklearn.model_selection import GridSearchCV
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, classification_report
+from sklearn.preprocessing import LabelEncoder
+import pickle
+import joblib
 
 # Function to load data from pickle files
 def load_data(train_file, test_file):
@@ -26,6 +28,18 @@ def initialize_models():
 def grid_search_and_evaluate(models, X_train, y_train, X_test, y_test):
     best_model = None
     best_accuracy = 0
+
+    # Ensure X_train and X_test are numpy arrays with the correct shape
+    X_train = np.array([np.array(x) for x in X_train])  # Convert list of lists to 2D numpy array
+    X_test = np.array([np.array(x) for x in X_test])  # Convert list of lists to 2D numpy array
+
+    # Check if the data is properly shaped
+    print(f"X_train shape: {X_train.shape}, X_test shape: {X_test.shape}")
+
+    # Ensure the labels are properly encoded as integers
+    label_encoder = LabelEncoder()
+    y_train = label_encoder.fit_transform(y_train)
+    y_test = label_encoder.transform(y_test)
 
     # Define parameter grids for each model
     param_grids = {
@@ -55,7 +69,7 @@ def grid_search_and_evaluate(models, X_train, y_train, X_test, y_test):
 
         # Make predictions using the best model
         y_pred = best_grid_model.predict(X_test)
-        
+
         # Evaluate the model's performance
         accuracy = accuracy_score(y_test, y_pred)
         print(f"{name} - Best Parameters: {grid_search.best_params_}")
@@ -72,7 +86,7 @@ def grid_search_and_evaluate(models, X_train, y_train, X_test, y_test):
 # Main execution
 def main():
     # Load the preprocessed data
-    train_df, test_df = load_data('/content/train_data.pkl', '/content/test_data.pkl')
+    train_df, test_df = load_data('C:\Users\SOOQ ELASER\movie_genre_prediction\dataset\train_data.pkl', 'C:\Users\SOOQ ELASER\movie_genre_prediction\dataset\test_data.pkl')
 
     # Extract features and labels (preprocessed)
     X_train = train_df['description_embedding']  # Already preprocessed features
