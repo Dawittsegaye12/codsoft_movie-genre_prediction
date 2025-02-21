@@ -72,13 +72,13 @@ def grid_search_and_evaluate(models, X_train, y_train, X_test, y_test):
 # Main execution
 def main():
     # Load the preprocessed data
-    train_df, test_df = load_data('C:\Users\SOOQ ELASER\movie_genre_prediction\dataset\train_data.pkl', 'C:\Users\SOOQ ELASER\movie_genre_prediction\dataset\test_data.pkl')
+    train_df, test_df = load_data('/content/train_data.pkl', '/content/test_data.pkl')
 
-    # Extract features and labels
-    X_train = train_df['tfidf_features']
-    y_train = train_df['genre_encoded']
-    X_test = test_df['tfidf_features']
-    y_test = test_df['genre_encoded']
+    # Extract features and labels (preprocessed)
+    X_train = train_df['description_embedding']  # Already preprocessed features
+    y_train = train_df['genre_encoded']  # Genre labels (encoded)
+    X_test = test_df['description_embedding']  # Already preprocessed features
+    y_test = test_df['genre_encoded']  # Genre labels (encoded)
 
     # Initialize models
     models = initialize_models()
