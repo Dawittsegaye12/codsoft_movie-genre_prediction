@@ -72,7 +72,7 @@ def grid_search_and_evaluate(models, X_train, y_train, X_test, y_test):
 # Main execution
 def main():
     # Load the preprocessed data
-    train_df, test_df = load_data('training_data.pkl', 'testing_data.pkl')
+    train_df, test_df = load_data('C:\Users\SOOQ ELASER\movie_genre_prediction\dataset\train_data.pkl', 'C:\Users\SOOQ ELASER\movie_genre_prediction\dataset\test_data.pkl')
 
     # Extract features and labels
     X_train = train_df['tfidf_features']
